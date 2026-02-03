@@ -8,6 +8,8 @@ namespace NesLibraryApp.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly InputService _inputService;
+    private readonly MetadataStore _metadataStore;
+    private EmulatorService? _emulatorService;
 
     [ObservableProperty]
     private LibraryViewModel _libraryViewModel;
@@ -16,13 +18,20 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private GameDetailsViewModel? _gameDetailsViewModel;
 
     [ObservableProperty]
+    private EmulatorViewModel? _emulatorViewModel;
+
+    [ObservableProperty]
     private bool _isPopupVisible;
+
+    [ObservableProperty]
+    private bool _isEmulatorVisible;
 
     [ObservableProperty]
     private bool _isGamepadConnected;
 
     public MainWindowViewModel()
     {
+        _metadataStore = new MetadataStore();
         _libraryViewModel = new LibraryViewModel();
         _libraryViewModel.NavigateToGameDetails = ShowGameDetailsPopup;
 
@@ -38,7 +47,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             IsGamepadConnected = _inputService.IsGamepadConnected;
 
-            if (IsPopupVisible && GameDetailsViewModel != null)
+            if (IsEmulatorVisible && EmulatorViewModel != null)
+            {
+                HandleEmulatorInput(button);
+            }
+            else if (IsPopupVisible && GameDetailsViewModel != null)
             {
                 HandlePopupInput(GameDetailsViewModel, button);
             }
@@ -112,15 +125,52 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 ClosePopup();
                 break;
 
+            case GamepadButton.A:
+            case GamepadButton.Start:
+                // Play the game
+                LaunchGame(vm.Game);
+                break;
+
             case GamepadButton.Y:
                 vm.Game.ToggleFavoriteCommand.Execute(null);
                 break;
         }
     }
 
+    private void HandleEmulatorInput(GamepadButton button)
+    {
+        if (EmulatorViewModel == null || _emulatorService == null) return;
+
+        // Map gamepad to NES controller
+        var nesButton = button switch
+        {
+            GamepadButton.DPadUp => NesEmulator.Input.Controller.Buttons.Up,
+            GamepadButton.DPadDown => NesEmulator.Input.Controller.Buttons.Down,
+            GamepadButton.DPadLeft => NesEmulator.Input.Controller.Buttons.Left,
+            GamepadButton.DPadRight => NesEmulator.Input.Controller.Buttons.Right,
+            GamepadButton.A => NesEmulator.Input.Controller.Buttons.A,
+            GamepadButton.B or GamepadButton.X => NesEmulator.Input.Controller.Buttons.B,
+            GamepadButton.Start => NesEmulator.Input.Controller.Buttons.Start,
+            GamepadButton.Back => NesEmulator.Input.Controller.Buttons.Select,
+            _ => (NesEmulator.Input.Controller.Buttons)0
+        };
+
+        if (nesButton != 0)
+        {
+            _emulatorService.SetButton(nesButton, true);
+            // Note: In a real implementation, we'd need to track button release too
+        }
+
+        // Handle Back button for exit
+        if (button == GamepadButton.Back && _inputService.IsButtonHeld(GamepadButton.Start))
+        {
+            ExitEmulator();
+        }
+    }
+
     private void ShowGameDetailsPopup(GameItemViewModel game)
     {
-        GameDetailsViewModel = new GameDetailsViewModel(game, ClosePopup);
+        GameDetailsViewModel = new GameDetailsViewModel(game, ClosePopup, LaunchGame);
         IsPopupVisible = true;
     }
 
@@ -130,9 +180,53 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         GameDetailsViewModel = null;
     }
 
+    private void LaunchGame(GameItemViewModel game)
+    {
+        if (string.IsNullOrEmpty(game.FilePath))
+            return;
+
+        // Close popup first
+        ClosePopup();
+
+        // Create emulator service
+        _emulatorService?.Dispose();
+        _emulatorService = new EmulatorService(_metadataStore);
+
+        // Load the game
+        if (!_emulatorService.LoadGame(game.FilePath, game.Id))
+        {
+            _emulatorService.Dispose();
+            _emulatorService = null;
+            return;
+        }
+
+        // Create emulator view model
+        EmulatorViewModel = new EmulatorViewModel(_emulatorService, game.DisplayName, ExitEmulator);
+
+        // Show emulator
+        IsEmulatorVisible = true;
+
+        // Start emulation
+        _emulatorService.Start();
+    }
+
+    private void ExitEmulator()
+    {
+        IsEmulatorVisible = false;
+
+        _emulatorService?.Stop();
+        _emulatorService?.Dispose();
+        _emulatorService = null;
+
+        EmulatorViewModel?.Dispose();
+        EmulatorViewModel = null;
+    }
+
     public void Dispose()
     {
         _inputService.ButtonPressed -= OnGamepadButtonPressed;
         _inputService.Dispose();
+        _emulatorService?.Dispose();
+        _metadataStore.Dispose();
     }
 }

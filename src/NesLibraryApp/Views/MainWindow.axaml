@@ -18,7 +18,14 @@
 
     <Grid RowDefinitions="*,Auto">
         <!-- Main Content - Library View -->
-        <views:LibraryView Grid.Row="0" DataContext="{Binding LibraryViewModel}"/>
+        <views:LibraryView Grid.Row="0"
+                           DataContext="{Binding LibraryViewModel}"
+                           IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsEmulatorVisible, Converter={x:Static BoolConverters.Not}}"/>
+
+        <!-- Emulator View -->
+        <views:EmulatorView Grid.Row="0"
+                            DataContext="{Binding EmulatorViewModel}"
+                            IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsEmulatorVisible}"/>
 
         <!-- Popup Overlay -->
         <Border Grid.Row="0"
@@ -41,7 +48,8 @@
         </Border>
 
         <!-- Status Bar -->
-        <Border Grid.Row="1" Background="#151515" Padding="12,6" ZIndex="50">
+        <Border Grid.Row="1" Background="#151515" Padding="12,6" ZIndex="50"
+                IsVisible="{Binding !IsEmulatorVisible}">
             <Grid ColumnDefinitions="*,Auto">
                 <!-- Navigation hints -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">

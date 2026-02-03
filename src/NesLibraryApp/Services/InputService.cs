@@ -55,6 +55,11 @@ public class InputService : IDisposable
 
     public bool IsGamepadConnected => _currentState.IsConnected;
 
+    public bool IsButtonHeld(GamepadButton button)
+    {
+        return _currentState.Buttons.TryGetValue(button, out var held) && held;
+    }
+
     public InputService()
     {
         InitializeSDL();

@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NesLibraryApp.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="NesLibraryApp.Views.EmulatorView"
+             x:DataType="vm:EmulatorViewModel"
+             Background="Black"
+             Focusable="True"
+             KeyDown="OnKeyDown"
+             KeyUp="OnKeyUp">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#1a1a1a" Padding="16,10" IsVisible="{Binding ShowControls}">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding GameName}"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Content="{Binding PauseResumeText}"
+                            Command="{Binding TogglePauseCommand}"
+                            Background="#333333"
+                            Foreground="White"
+                            Padding="16,6"
+                            FontSize="12"/>
+                    <Button Content="Reset"
+                            Command="{Binding ResetCommand}"
+                            Background="#333333"
+                            Foreground="White"
+                            Padding="16,6"
+                            FontSize="12"/>
+                    <Button Content="Exit"
+                            Command="{Binding ExitCommand}"
+                            Background="#76B900"
+                            Foreground="White"
+                            Padding="16,6"
+                            FontSize="12"
+                            FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Game Display -->
+        <Viewbox Grid.Row="1" Stretch="Uniform" Margin="20">
+            <Border Background="Black" CornerRadius="4" ClipToBounds="True">
+                <Image x:Name="GameImage"
+                       Width="256" Height="240"
+                       Source="{Binding CurrentFrame}"/>
+            </Border>
+        </Viewbox>
+
+        <!-- Footer with controls hint -->
+        <Border Grid.Row="2" Background="#1a1a1a" Padding="16,8" IsVisible="{Binding ShowControls}">
+            <TextBlock Text="Arrow Keys: D-Pad | Z: A | X: B | Enter: Start | Shift: Select | Esc: Exit"
+                       FontSize="11"
+                       Foreground="#666666"
+                       HorizontalAlignment="Center"/>
+        </Border>
+    </Grid>
+</UserControl>

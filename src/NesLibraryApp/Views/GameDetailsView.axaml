@@ -110,6 +110,7 @@
             <Grid ColumnDefinitions="*,*">
                 <Button Grid.Column="0"
                         Content="Play"
+                        Command="{Binding PlayCommand}"
                         Background="#76B900"
                         Foreground="White"
                         Padding="32,12"
@@ -117,7 +118,7 @@
                         FontWeight="SemiBold"
                         CornerRadius="4"
                         HorizontalAlignment="Left"
-                        IsEnabled="False"/>
+                        IsEnabled="{Binding CanPlay}"/>
                 <Button Grid.Column="1"
                         Content="Close"
                         Command="{Binding BackCommand}"
