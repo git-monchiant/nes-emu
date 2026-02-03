@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NesLibraryApp.ViewModels"
+             xmlns:local="using:NesLibraryApp.Views"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="450"
+             x:Class="NesLibraryApp.Views.GameDetailsView"
+             x:DataType="vm:GameDetailsViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header with close button -->
+        <Border Grid.Row="0" Background="#1a1a1a" Padding="20,16">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding Game.DisplayName}"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+                <Button Grid.Column="1"
+                        Content="&#x2715;"
+                        Command="{Binding BackCommand}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Foreground="#888888"
+                        FontSize="18"
+                        Padding="8,4"
+                        VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <Border Grid.Row="1" Background="#242424" Padding="20">
+            <Grid ColumnDefinitions="Auto,*">
+                <!-- Cover Image -->
+                <Border Grid.Column="0"
+                        Width="180" Height="270"
+                        CornerRadius="8"
+                        ClipToBounds="True"
+                        Background="#000000"
+                        Margin="0,0,20,0">
+                    <Image Source="{Binding Game.CoverImage}"
+                           Stretch="Uniform"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                </Border>
+
+                <!-- Game Info -->
+                <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center">
+                    <!-- File Name -->
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="File:"
+                                   Foreground="#888888"
+                                   Width="80"/>
+                        <TextBlock Text="{Binding Game.FileName}"
+                                   Foreground="#CCCCCC"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- File Size -->
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Size:"
+                                   Foreground="#888888"
+                                   Width="80"/>
+                        <TextBlock Text="{Binding Game.FileSizeFormatted}"
+                                   Foreground="#CCCCCC"/>
+                    </StackPanel>
+
+                    <!-- Date Added -->
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Added:"
+                                   Foreground="#888888"
+                                   Width="80"/>
+                        <TextBlock Text="{Binding Game.DateAdded, StringFormat='{}{0:yyyy-MM-dd}'}"
+                                   Foreground="#CCCCCC"/>
+                    </StackPanel>
+
+                    <!-- Last Played -->
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Last Played:"
+                                   Foreground="#888888"
+                                   Width="80"/>
+                        <TextBlock Text="{Binding Game.LastPlayedFormatted}"
+                                   Foreground="#CCCCCC"/>
+                    </StackPanel>
+
+                    <!-- Favorite Status -->
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Favorite:"
+                                   Foreground="#888888"
+                                   Width="80"
+                                   VerticalAlignment="Center"/>
+                        <Button Command="{Binding Game.ToggleFavoriteCommand}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="0">
+                            <TextBlock Text="{Binding Game.IsFavorite, Converter={x:Static local:BoolToStarConverter.Instance}}"
+                                       FontSize="24"
+                                       Foreground="#FFD700"/>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Footer with action buttons -->
+        <Border Grid.Row="2" Background="#1a1a1a" Padding="20,16">
+            <Grid ColumnDefinitions="*,*">
+                <Button Grid.Column="0"
+                        Content="Play"
+                        Background="#76B900"
+                        Foreground="White"
+                        Padding="32,12"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        CornerRadius="4"
+                        HorizontalAlignment="Left"
+                        IsEnabled="False"/>
+                <Button Grid.Column="1"
+                        Content="Close"
+                        Command="{Binding BackCommand}"
+                        Background="#333333"
+                        Foreground="White"
+                        Padding="32,12"
+                        FontSize="14"
+                        CornerRadius="4"
+                        HorizontalAlignment="Right"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

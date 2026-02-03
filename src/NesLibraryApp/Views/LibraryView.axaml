@@ -1,0 +1,247 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NesLibraryApp.ViewModels"
+             xmlns:local="using:NesLibraryApp.Views"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+             x:Class="NesLibraryApp.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+
+    <Design.DataContext>
+        <vm:LibraryViewModel/>
+    </Design.DataContext>
+
+    <UserControl.Styles>
+        <!-- Game Card hover effect -->
+        <Style Selector="Border.game-card">
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.game-card:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.03)"/>
+        </Style>
+
+        <!-- Selection border style -->
+        <Style Selector="Border.selection-border">
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="3"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.1"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.game-card:pointerover Border.selection-border">
+            <Setter Property="BorderBrush" Value="#76B900"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*" Background="#1a1a1a">
+
+        <!-- Top Header Bar -->
+        <Border Grid.Row="0" Background="#242424" Padding="0">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                <!-- Left: Back button and Category -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="&#x276E;"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Foreground="#888888"
+                            FontSize="16"
+                            Padding="16,12"
+                            VerticalAlignment="Stretch"/>
+                    <TextBlock Text="NES Library"
+                               FontSize="14"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- Center: Search Box (Full Width) -->
+                <Border Grid.Column="1"
+                        Background="#333333"
+                        CornerRadius="4"
+                        Margin="24,8"
+                        HorizontalAlignment="Stretch">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="&#x1F50D;"
+                                   Foreground="#666666"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,8,0"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding SearchText}"
+                                 Watermark="Find your games"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="White"
+                                 VerticalAlignment="Center"
+                                 Padding="0,8"/>
+                        <Button Grid.Column="2"
+                                Content="&#x2715;"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Foreground="#666666"
+                                Padding="8"
+                                IsVisible="{Binding SearchText.Length}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Right: Settings and User -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Button Command="{Binding ScanRomsCommand}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="12,8"
+                            ToolTip.Tip="Scan for games">
+                        <TextBlock Text="&#x2795;" Foreground="#888888" FontSize="14"/>
+                    </Button>
+                    <ToggleButton IsChecked="{Binding ShowFavoritesOnly}"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  Padding="12,8"
+                                  ToolTip.Tip="Show favorites only">
+                        <TextBlock Text="★" Foreground="#888888" FontSize="14"/>
+                    </ToggleButton>
+                    <!-- User Avatar -->
+                    <Border Background="#76B900"
+                            CornerRadius="16"
+                            Width="32" Height="32"
+                            Margin="8,0,0,0">
+                        <TextBlock Text="U"
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Sub Header: Game Count and Sort -->
+        <Border Grid.Row="1" Background="#1a1a1a" Padding="24,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Game Count -->
+                <TextBlock Grid.Column="0"
+                           Text="{Binding TotalGamesCount, StringFormat='{}{0} games'}"
+                           Foreground="White"
+                           FontSize="13"
+                           VerticalAlignment="Center"/>
+
+                <!-- Sort Dropdown -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <ComboBox SelectedIndex="0"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              Foreground="White"
+                              MinWidth="100">
+                        <ComboBoxItem Content="Default"/>
+                        <ComboBoxItem Content="A-Z"/>
+                        <ComboBoxItem Content="Z-A"/>
+                        <ComboBoxItem Content="Recent"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Loading Indicator -->
+        <Border Grid.Row="2"
+                IsVisible="{Binding IsLoading}"
+                Background="#CC1a1a1a"
+                ZIndex="100">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Foreground="#76B900"/>
+                <TextBlock Text="Loading..."
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           Margin="0,12,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Games Grid - GeForce NOW Style -->
+        <ScrollViewer Grid.Row="2"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="16,0">
+            <ItemsControl ItemsSource="{Binding Games}" Margin="8">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:GameItemViewModel">
+                        <Border Classes="game-card"
+                                Width="200" Height="300"
+                                Margin="12"
+                                CornerRadius="8"
+                                ClipToBounds="True"
+                                Background="{Binding CardBackground}"
+                                Cursor="Hand"
+                                DoubleTapped="OnGameCardDoubleTapped"
+                                Tapped="OnGameCardTapped">
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Play" IsEnabled="False"/>
+                                    <MenuItem Header="{Binding IsFavorite, Converter={x:Static local:FavoriteMenuConverter.Instance}}"
+                                              Command="{Binding ToggleFavoriteCommand}"/>
+                                    <Separator/>
+                                    <MenuItem Header="Show in Finder"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
+
+                            <Grid>
+                                <!-- Cover Image -->
+                                <Image Source="{Binding CoverImage}"
+                                       Stretch="Uniform"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"/>
+
+                                <!-- Selection/Hover Border -->
+                                <Border Classes="selection-border"
+                                        CornerRadius="8"
+                                        BorderBrush="{Binding IsSelected, Converter={x:Static local:BoolToSelectionBrushConverter.Instance}}"/>
+
+                                <!-- Favorite indicator -->
+                                <Border Background="#80000000"
+                                        CornerRadius="4"
+                                        Padding="4,2"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Margin="8"
+                                        IsVisible="{Binding IsFavorite}">
+                                    <TextBlock Text="★" Foreground="#FFD700" FontSize="12"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Empty State -->
+        <StackPanel Grid.Row="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding !Games.Count}">
+            <TextBlock Text="No games found"
+                       Foreground="#666666"
+                       FontSize="18"
+                       HorizontalAlignment="Center"/>
+            <Button Content="Add Games"
+                    Command="{Binding ScanRomsCommand}"
+                    Background="#76B900"
+                    Foreground="White"
+                    Padding="24,12"
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,85 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NesLibraryApp.ViewModels"
+        xmlns:views="using:NesLibraryApp.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1200"
+        x:Class="NesLibraryApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="NES Library"
+        Width="1920" Height="1200"
+        MinWidth="800" MinHeight="600">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="*,Auto">
+        <!-- Main Content - Library View -->
+        <views:LibraryView Grid.Row="0" DataContext="{Binding LibraryViewModel}"/>
+
+        <!-- Popup Overlay -->
+        <Border Grid.Row="0"
+                Background="#CC000000"
+                IsVisible="{Binding IsPopupVisible}"
+                ZIndex="100">
+            <Border Background="#242424"
+                    CornerRadius="12"
+                    MaxWidth="700"
+                    MaxHeight="500"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Padding="0"
+                    ClipToBounds="True">
+                <Border.BoxShadow>
+                    <BoxShadows>0 8 32 #40000000</BoxShadows>
+                </Border.BoxShadow>
+                <views:GameDetailsView DataContext="{Binding GameDetailsViewModel}"/>
+            </Border>
+        </Border>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="1" Background="#151515" Padding="12,6" ZIndex="50">
+            <Grid ColumnDefinitions="*,Auto">
+                <!-- Navigation hints -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                    <TextBlock Foreground="#555555" FontSize="11">
+                        <Run Text="Navigate:"/>
+                        <Run Text="Arrow Keys / D-Pad" Foreground="#888888"/>
+                    </TextBlock>
+                    <TextBlock Foreground="#555555" FontSize="11">
+                        <Run Text="Select:"/>
+                        <Run Text="Enter / A" Foreground="#888888"/>
+                    </TextBlock>
+                    <TextBlock Foreground="#555555" FontSize="11">
+                        <Run Text="Back:"/>
+                        <Run Text="Esc / B" Foreground="#888888"/>
+                    </TextBlock>
+                    <TextBlock Foreground="#555555" FontSize="11">
+                        <Run Text="Favorite:"/>
+                        <Run Text="Y" Foreground="#888888"/>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Controller Status -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Controller:"
+                               Foreground="#555555"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                    <Border Background="{Binding IsGamepadConnected, Converter={x:Static views:BoolToColorConverter.Instance}}"
+                            CornerRadius="4"
+                            Width="8" Height="8"
+                            VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding IsGamepadConnected, Converter={x:Static views:BoolToStatusConverter.Instance}}"
+                               Foreground="#888888"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+
+</Window>
